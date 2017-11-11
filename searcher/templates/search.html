@@ -22,10 +22,10 @@
             <table>
                 {% if entries %}
                     <table>
-                        {% for score, title, url, content in entries %}
+                        {% for category, keyword in entries %}
                         <tr>
                             <td>
-                                <h4><a href="{{ url }}">{{ title }}</a><span class='notbold'> - [{{ score }}]</span></h4>
+                                <h4><a href="{{ url }}">{{ category }}</a><span class='notbold'> - [{{ keyword }}]</span></h4>
                                 {{ content }}
                             </td>
                         </tr>
