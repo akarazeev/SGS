@@ -6,6 +6,9 @@ import os
 
 from utils import *
 
+from searcher.backend import Backend
+backend = Backend(index_file='full_index', meta_data_file='titles_and_types.csv.tsv')
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -18,7 +21,6 @@ actions = {
     'SEARCH': '3'
 }
 
-# to_iterate = ['a', 'b', 'c', 'd']
 iterator = 0
 is_searching = False
 to_iterate = None
@@ -59,6 +61,7 @@ def button(bot, update):
         bot.edit_message_text(text="Ok, next",
                               chat_id=query.message.chat_id,
                               message_id=query.message.message_id)
+        bot.send_message(query.message.chat_id, '--------------------------')
         if iterator+1 < len(to_iterate):
             iterator += 1
             # bot.send_message(query.message.chat_id, to_iterate[iterator])
@@ -94,15 +97,17 @@ def button(bot, update):
 def send_doc(update):
     chat_id = str(update.message.chat_id)
 
-    if iterator+1 < len(to_iterate):
+    if iterator < len(to_iterate):
         doc = to_iterate[iterator]
 
-        update.message.reply_text('Document {}/{}'.format(iterator+1, len(to_iterate)))
-        update.message.reply_text(doc)
+        update.message.reply_text('Title: "{}"'.format(doc['title']))
+        update.message.reply_text('Type: "{}"'.format(doc['type']))
 
-        keywords = get_keywords(doc, 10)
-        keywords = list(map(lambda x: (x['text'], x['relevance']), keywords))
+        categ = category(doc)
+        update.message.reply_text('Category: {}'.format(categ))
+        update.message.reply_text('Document {}'.format(iterator+1))
 
+        keywords = doc['keywords'][:10]
         wcloud_path = "wordClouds/" + chat_id + '.png'
         make_wordcloud(keywords, wcloud_path)
 
@@ -119,48 +124,30 @@ def rules_fun(bot, update):
     query = update.message.text
     chat_id = str(update.message.chat_id)
 
-    to_iterate = os.listdir('jsons')
+    # to_iterate = os.listdir('jsons')
+    glob_stats, to_iterate = backend.process_query(query)
     iterator = 0
 
-    update.message.reply_text('Total found: {}'.format(len(to_iterate)))
-    send_doc(update)
+    update.message.reply_text('Total found: {}'.format(glob_stats['docs_found']))
+
+    if glob_stats['sentiment'] > 0:
+        update.message.reply_text('Average sentiment: positive')
+    else:
+        update.message.reply_text('Average sentiment: negative')
+    update.message.reply_text('All locations: {}'.format(glob_stats['locations']))
+    update.message.reply_text('All categories: {}'.format(glob_stats['categories']))
+
+    keywords = glob_stats['keywords'][:10]
+    wcloud_path = "wordClouds/" + chat_id + '.png'
+    make_wordcloud(keywords, wcloud_path)
+
+    with open(wcloud_path, 'rb') as f:
+        update.message.reply_photo(photo=f)
+
+    # send_doc(update)
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Choose something', reply_markup=reply_markup)
-
-    # filename = '0a0d2676-2fbd-4265-9100-032489b44cc1.json'
-    #
-    # update.message.reply_text(filename)
-    #
-    # keywords = get_keywords(filename, 10)
-    # keywords = list(map(lambda x: (x['text'], x['relevance']), keywords))
-    #
-    # wcloud_path = "wordClouds/" + chat_id + '.png'
-    # make_wordcloud(keywords, wcloud_path)
-    #
-    # with open(wcloud_path, 'rb') as f:
-    #     update.message.reply_photo(photo=f)
-
-    # TODO: PASS Oleg function here
-    #
-    # 1. Get list of ranked documents
-    #
-    # index = DocumentsIndex()
-    # index.load_index_from_file("checkpoint23000.dms")
-    # index.fill_doc_len()
-    # engine = Engine(index)
-    #
-    # update.message.reply_text(engine.process_query([query]))
-    #
-    #
-    # 2. Make WordCloud for every returned document
-    #
-    # wcloud_path = "wordClouds/" + update.message.chatid
-    # update.message.reply_photo(photoid)
-    #
-    #
-    # 3. Iterate over returned image
-    #
 
 
 def help_function(bot, update):
