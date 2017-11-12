@@ -55,10 +55,10 @@ class Backend:
         for result in all_results:
             for location in result['locations']:
                 global_stats['locations'].append(location[0])
-        global_stats['keywords'].append((result['keywords'][0][0], float(result['keywords'][0][1]) * float(result['relevance'])))
-        global_stats['sentiment'] += float(result['sentiment']) * float(result['relevance'])
-        for category in result['categories']:
-            global_stats['categories'].append(category[0])
+            global_stats['keywords'].append((result['keywords'][0][0], float(result['keywords'][0][1]) * float(result['relevance'])))
+            global_stats['sentiment'] += float(result['sentiment']) * float(result['relevance'])
+            for category in result['categories']:
+                global_stats['categories'].append(category[0])
         return global_stats, all_results
 
     @staticmethod
