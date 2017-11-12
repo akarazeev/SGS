@@ -1,6 +1,6 @@
 ## SGS Intelligent Analyzer Engine
 
-
+### Project Description
 ![alt text](https://github.com/akarazeev/SGS/blob/master/presentation_NNNerds/NNNerds-page-001.jpg)
 
 ![alt text](https://github.com/akarazeev/SGS/blob/master/presentation_NNNerds/NNNerds-page-002.jpg)
@@ -15,6 +15,8 @@
 
 ![alt text](https://github.com/akarazeev/SGS/blob/master/presentation_NNNerds/NNNerds-page-007.jpg)
 
+
+### Telegram bot
 
 
 
