@@ -25,8 +25,8 @@ class Backend:
     def process_query(self, query):
         query.lower().split()
         preprocessed_query = self.indexer.run_stemmer(query)
-        found = self.engine.process_query(preprocessed_query)[:20]
-        found_filtered = [(file, relevance) for file, relevance in found
+        found = self.engine.process_query(preprocessed_query)
+        found_filtered = [(file, relevance) for file, relevance in found[:20]
                           if os.path.isfile(os.path.join(MERGED_FILES_DIR, file[len(SOURCE_FILES_DIR) + 1:]))]
         found_filtered = found_filtered[:10]
         all_results = []
@@ -34,20 +34,32 @@ class Backend:
             results = {}
             doc_id = file[len(SOURCE_FILES_DIR) + 1:]
             doc_type, title = self.get_meta_data(doc_id)
-            summary = self.summarize(doc_id, MERGED_FILES_DIR)
 
             results["id"] = doc_id
             results["relevance"] = relevance
             results["type"] = doc_type
             results["title"] = title
-            results["summary"] = summary
+            results["summary"] = "PLEASE CALL Backend.summarize(id, SOURCE_FILES_DIR)"
             sentiment, keywords, categories, locations = self.get_info_from_json(doc_id)
             results['sentiment'] = sentiment
             results['keywords'] = keywords
             results['categories'] = categories
             results['locations'] = locations
             all_results.append(results)
-        return all_results
+        global_stats = {}
+        global_stats['docs_found'] = len(found)
+        global_stats['sentiment'] = float(0.0)
+        global_stats['keywords'] = []
+        global_stats['locations'] = []
+        global_stats['categories'] = []
+        for result in all_results:
+            for location in result['locations']:
+                global_stats['locations'].append(location[0])
+        global_stats['keywords'].append((result['keywords'][0][0], float(result['keywords'][0][1]) * float(result['relevance'])))
+        global_stats['sentiment'] += float(result['sentiment']) * float(result['relevance'])
+        for category in result['categories']:
+            global_stats['categories'].append(category[0])
+        return global_stats, all_results
 
     @staticmethod
     def summarize(post_id, dir_texts):
@@ -55,7 +67,9 @@ class Backend:
             data = infile.read()
         result = []
         if len(data.split('.')) > 1:
-            summary = summarize(data, split=True)
+            print("ratio = ", float(500) / len(data))
+            summary = summarize(data, ratio=float(500) / len(data), split=True)
+            print("summary = ",  summary)
 
             seen = set()
             result = []
