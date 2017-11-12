@@ -12,11 +12,10 @@ def readjs(filename):
     return datajs
 
 
-def get_keywords(filename, topn=5):
+def get_keywords(datajs, topn=5):
     """
     Return keywords for document `filename`.
     """
-    datajs = readjs(filename)
     keywords = sorted(datajs['keywords'], key=lambda x: x['relevance'], reverse=True)
     return keywords[:topn]
 
@@ -44,3 +43,9 @@ def subcat(category, to_cut=to_cut):
         return category[2]
     else:
         return category[1]
+
+
+def category(entry):
+    long_category = sorted(entry['categories'], key=lambda x: x[1], reverse=True)[0][0]
+    subcat(long_category)
+    return long_category
