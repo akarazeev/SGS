@@ -16,7 +16,7 @@
 ![alt text](https://github.com/akarazeev/SGS/blob/master/presentation_NNNerds/NNNerds-page-007.jpg)
 
 
-### Telegram bot t.me/sgs_doc_key_bot.
+### Telegram bot [a link](t.me/sgs_doc_key_bot)  .
 
 
 
